@@ -1,8 +1,7 @@
 from flask import Flask, request, send_file
 import tempfile
 import os
-import shutil
-from facturx.facturx_tools import add_facturx_to_pdf
+from facturx.facturx import generate_facturx_from_binary_pdf
 
 app = Flask(__name__)
 
@@ -11,17 +10,20 @@ def generate():
     pdf_file = request.files['pdf']
     xml_file = request.files['xml']
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        pdf_path = os.path.join(temp_dir, "source.pdf")
-        xml_path = os.path.join(temp_dir, "meta.xml")
-        output_path = os.path.join(temp_dir, "facturx_final.pdf")
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf, \
+         tempfile.NamedTemporaryFile(delete=False, suffix='.xml') as temp_xml, \
+         tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_out:
 
-        pdf_file.save(pdf_path)
-        xml_file.save(xml_path)
+        pdf_file.save(temp_pdf.name)
+        xml_file.save(temp_xml.name)
 
-        add_facturx_to_pdf(pdf_path, xml_path, output_path)
+        generate_facturx_from_binary_pdf(
+            pdf_file_path=temp_pdf.name,
+            facturx_xml_file_path=temp_xml.name,
+            output_pdf_file_path=temp_out.name
+        )
 
-        return send_file(output_path, mimetype='application/pdf', as_attachment=True, download_name='facturx.pdf')
+        return send_file(temp_out.name, mimetype='application/pdf', as_attachment=True, download_name='facturx.pdf')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
