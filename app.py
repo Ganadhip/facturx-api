@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file
 import tempfile
 import os
-from facturx.facturx import generate_facturx_from_binary_pdf
+from facturx.facturx import add_facturx_to_pdf
 
 app = Flask(__name__)
 
@@ -17,10 +17,11 @@ def generate():
         pdf_file.save(temp_pdf.name)
         xml_file.save(temp_xml.name)
 
-        generate_facturx_from_binary_pdf(
+        # Cette fonction ajoute le XML dans le PDF
+        add_facturx_to_pdf(
             pdf_file_path=temp_pdf.name,
             facturx_xml_file_path=temp_xml.name,
-            output_pdf_file_path=temp_out.name
+            output_pdf_file_path=temp_out.name,
         )
 
         return send_file(temp_out.name, mimetype='application/pdf', as_attachment=True, download_name='facturx.pdf')
