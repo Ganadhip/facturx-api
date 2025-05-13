@@ -1,7 +1,7 @@
 from flask import Flask, request, send_file
 import tempfile
 import os
-from facturx.facturx import add_facturx_to_pdf
+from facturx.tools import add_facturx_to_pdf
 
 app = Flask(__name__)
 
