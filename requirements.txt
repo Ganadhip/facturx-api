@@ -1,3 +1,4 @@
 flask
-factur-x
 reportlab
+git+https://github.com/akretion/factur-x.git
+
